@@ -21,7 +21,7 @@ public class SearchChController {
     private final SearchChService searchChService;
 
     @RequestMapping("/searcch")
-    public ResponseEntity<Integer> chServiceCrawlerController() {
+    public ResponseEntity<Long> chServiceCrawlerController() {
         log.info("searcch crawler begins");
 
         return ResponseEntity

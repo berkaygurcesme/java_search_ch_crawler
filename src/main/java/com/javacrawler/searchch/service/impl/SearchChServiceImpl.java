@@ -8,6 +8,8 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import com.javacrawler.searchch.dto.PersonDto;
+import com.javacrawler.searchch.entity.PersonEntity;
+import com.javacrawler.searchch.repository.PersonRepository;
 import com.javacrawler.searchch.service.SearchChService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.openqa.selenium.By;
@@ -32,8 +35,11 @@ import org.openqa.selenium.chrome.ChromeOptions;
 @Service
 @RequiredArgsConstructor
 public class SearchChServiceImpl implements SearchChService {
+
+    private final PersonRepository personRepository;
+
     @Override
-    public int chServiceCrawler() {
+    public long chServiceCrawler() {
         char[] swissList = { 'a', 'ä', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
                 'k', 'l', 'm', 'n', 'o', 'ö', 'p', 'q', 'r', 's', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z'
         };
@@ -41,7 +47,7 @@ public class SearchChServiceImpl implements SearchChService {
         System.setProperty("webdriver.chrome.driver", "/Users/berkay/MyProjects/java/searchch/chromedriver");
         driver = new ChromeDriver();
         List<WebElement> resultWebelementsSonuc = null;
-        List<WebElement> personList;
+        List<WebElement> personList = null;
         driver.get("https://tel.search.ch/?privat=1");
         try {
             Thread.sleep(2000);
@@ -64,28 +70,64 @@ public class SearchChServiceImpl implements SearchChService {
         }
         System.out.println(cantonList.size());
 
-        HashSet<PersonDto> personDtoSet = new HashSet();
+        HashSet<PersonEntity> personEntitySet = new HashSet();
 
         for (int i = 0; i < swissList.length; i++) {
-            driver.get(" https://tel.search.ch/?name=" + swissList[i] + "&kanton=AG&privat=1");
-            personList = driver.findElements(By.xpath("//ol[contains(@class,'tel-results tel-entries')]//li"));
+            driver.get("https://tel.search.ch/?name=" + swissList[i] + "&kanton=" + cantonList.get(i).getText()
+                    + "&privat=1&pages=20");
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            try {
+                personList = driver.findElements(
+                        By.xpath(
+                                "//ol[contains(@class,'tel-results tel-entries')]//li[contains(@class,'tel-person')]"));
+
+            } catch (Exception e) {
+
+                System.out.println(e.getMessage());
+            }
+            String[] inputArray;
 
             for (int a = 0; a < personList.size(); a++) {
+                PersonEntity personEntity = null;
+                inputArray = personList.get(a).getText().split("\\R");
+                if (inputArray.length < 3) {
+                    personEntity = new PersonEntity(
+                            personList.get(a).getText().split("\\R")[0],
 
-                PersonDto personDto = new PersonDto(
-                        personList.get(a).findElement(By.xpath("//h1")).getText(),
-                        personList.get(a).findElement(By.xpath("//div[contains(@class,'tel-occupation')]")).getText(),
-                        personList.get(a).findElement(By.xpath("//div[contains(@class,'tel-address')]")).getText(),
-                        personList.get(a).findElement(
-                                By.xpath("//div[contains(@class,'tel-result-actions sl-screenonly sl-floatlist')]"))
-                                .getText());
-                personDtoSet.add(personDto);
+                            Optional.ofNullable(personList.get(a).getText().split("\\R")[1]).orElseGet(() -> ""),
+                            Optional.ofNullable(personList.get(a).getText().split("\\R")[2]).orElseGet(() -> ""),
+
+                            Optional.ofNullable(personList.get(a).getText().split("\\R")[3]).orElseGet(() -> ""),
+
+                            cantonList.get(i).getText()
+
+                    );
+                } else {
+                    personEntity = new PersonEntity(
+                            personList.get(a).getText().split("\\R")[0],
+
+                            Optional.ofNullable(personList.get(a).getText().split("\\R")[1]).orElseGet(() -> ""),
+                            Optional.ofNullable(personList.get(a).getText().split("\\R")[2]).orElseGet(() -> ""),
+                            "",
+                            cantonList.get(i).getText()
+
+                    );
+
+                }
+
+                personEntitySet.add(personEntity);
             }
 
         }
-        System.out.println(personDtoSet.size());
+        personRepository.saveAll(personEntitySet);
 
-        return 0;
+        System.out.println(personEntitySet.size());
+
+        return personRepository.count();
     }
 
 }
