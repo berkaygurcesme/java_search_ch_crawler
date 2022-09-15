@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import com.javacrawler.searchch.dto.PersonDto;
 import com.javacrawler.searchch.service.SearchChService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class SearchChServiceImpl implements SearchChService {
         System.setProperty("webdriver.chrome.driver", "/Users/berkay/MyProjects/java/searchch/chromedriver");
         driver = new ChromeDriver();
         List<WebElement> resultWebelementsSonuc = null;
+        List<WebElement> personList;
         driver.get("https://tel.search.ch/?privat=1");
         try {
             Thread.sleep(2000);
@@ -62,9 +64,27 @@ public class SearchChServiceImpl implements SearchChService {
         }
         System.out.println(cantonList.size());
 
-        for (int i = 0; i < cantonList.size(); i++) {
-            driver.get("https://tel.search.ch/?kanton=AG&privat=1");
+        HashSet<PersonDto> personDtoSet = new HashSet();
+
+        for (int i = 0; i < swissList.length; i++) {
+            driver.get(" https://tel.search.ch/?name=" + swissList[i] + "&kanton=AG&privat=1");
+            personList = driver.findElements(By.xpath("//ol[contains(@class,'tel-results tel-entries')]//li"));
+
+            for (int a = 0; a < personList.size(); a++) {
+
+                PersonDto personDto = new PersonDto(
+                        personList.get(a).findElement(By.xpath("//h1")).getText(),
+                        personList.get(a).findElement(By.xpath("//div[contains(@class,'tel-occupation')]")).getText(),
+                        personList.get(a).findElement(By.xpath("//div[contains(@class,'tel-address')]")).getText(),
+                        personList.get(a).findElement(
+                                By.xpath("//div[contains(@class,'tel-result-actions sl-screenonly sl-floatlist')]"))
+                                .getText());
+                personDtoSet.add(personDto);
+            }
+
         }
+        System.out.println(personDtoSet.size());
+
         return 0;
     }
 
