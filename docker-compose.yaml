@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  # app:
+  #   image: nginx:latest
+  #   ports:
+  #   - '8080:8080'
+  #   depends_on:
+  #   - db
+  db:
+    image: ubuntu/postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data/
+    ports:
+      - '5432:5432'
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgre_pass
+      - POSTGRES_USER=postgre_user
+      - POSTGRES_DB=testdb
+volumes:
+  pg-data:
