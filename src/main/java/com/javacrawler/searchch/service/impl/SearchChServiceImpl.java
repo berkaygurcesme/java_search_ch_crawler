@@ -1,37 +1,23 @@
 package com.javacrawler.searchch.service.impl;
 
-import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Service;
 
-import com.javacrawler.searchch.dto.PersonDto;
 import com.javacrawler.searchch.entity.PersonEntity;
 import com.javacrawler.searchch.repository.PersonRepository;
 import com.javacrawler.searchch.service.SearchChService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Array;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.By.ByClassName;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchChServiceImpl implements SearchChService {
@@ -92,18 +78,15 @@ public class SearchChServiceImpl implements SearchChService {
                     PersonEntity personEntity = null;
                     inputArray = personList.get(b).getText().split("\\R");
                     if (inputArray.length == 4) {
-                        try {
-                            personEntity = new PersonEntity(
-                                    inputArray[0],
-                                    inputArray[1],
-                                    inputArray[2],
-                                    inputArray[3],
-                                    cantonArray[a]
 
-                            );
-                        } catch (Exception e) {
-                            System.out.println(e.getMessage());
-                        }
+                        personEntity = new PersonEntity(
+                                inputArray[0],
+                                inputArray[1],
+                                inputArray[2],
+                                inputArray[3],
+                                cantonArray[a]
+
+                        );
 
                     } else if (inputArray.length == 3) {
                         personEntity = new PersonEntity(
@@ -135,7 +118,7 @@ public class SearchChServiceImpl implements SearchChService {
         }
         personRepository.saveAll(personEntitySet);
 
-        System.out.println(personEntitySet.size());
+        log.info("personset size=" + personEntitySet.size());
 
         return personRepository.count();
     }
@@ -144,7 +127,7 @@ public class SearchChServiceImpl implements SearchChService {
         try {
             Thread.sleep(1000);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.info("Wait for sec error!");
         }
     }
 

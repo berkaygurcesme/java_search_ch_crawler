@@ -31,12 +31,12 @@ import org.hibernate.annotations.OnDeleteAction;
 @ToString
 
 public class PersonEntity {
-    public PersonEntity(String text, String text2, String text3, String text4, String text5) {
-        this.name = text;
-        this.occupation = text2;
-        this.address = text3;
-        this.phone = text4;
-        this.locationcode = text5;
+    public PersonEntity(String name, String occupation, String address, String phone, String locationcode) {
+        this.name = name;
+        this.occupation = occupation;
+        this.address = address;
+        this.phone = phone;
+        this.locationcode = locationcode;
     }
 
     @Id
