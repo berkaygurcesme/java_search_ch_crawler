@@ -85,9 +85,10 @@ public class JsoupSearchChServiceImpl implements JsoupSearchChService {
     HashSet<JsoupPersonEntity> jsoupPersonEntitySet = new HashSet();
     Elements personList = null;
     Document doc = null;
+    long startTime;
 
     for (int a = 0; a < cantonArray.length; a++) {
-      long startTime = System.nanoTime();
+      startTime = System.nanoTime();
       for (int i = 0; i < swissList.length; i++) {
         try {
           doc =
@@ -108,12 +109,6 @@ public class JsoupSearchChServiceImpl implements JsoupSearchChService {
 
         waitForSec();
 
-        // personList =
-        //   Xsoup
-        //     .compile(
-        //       "//ol[contains(@class,'tel-results tel-entries')]//li[contains(@class,'tel-person')]"
-        //     )
-        //         .evaluate(doc).list();
         personList = doc.getElementsByClass("tel-person");
 
         for (int b = 0; b < personList.size(); b++) {
@@ -125,11 +120,11 @@ public class JsoupSearchChServiceImpl implements JsoupSearchChService {
           jsoupPersonEntitySet.add(jsoupPersonEntity);
         }
       }
-      long endTime = System.nanoTime();
+
       log.info(
         a +
         " jsoup iteration " +
-        (double) (endTime - startTime) /
+        (double) (System.nanoTime() - startTime) /
         1_000_000_000 +
         "personset size=" +
         jsoupPersonEntitySet.size()
